@@ -13,7 +13,7 @@ max = 0
 min = 0
 # paste value of sessionid_ss cookie 
 # (if you are here, i think you know how to get that value from your browser when you are in your tiktok account)
-cookie_session= "e6d9601f8c8646eee4dbf4c1bc900329"
+cookie_session= ""
 for x in range(55):
     if(min == -1 and max == -1):
         break
