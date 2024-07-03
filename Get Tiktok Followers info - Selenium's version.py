@@ -5,9 +5,8 @@ from selenium.common.exceptions import ElementClickInterceptedException, NoSuchE
 import time, json
 from seleniumwire import webdriver
 from seleniumwire.utils import decode
-
-# obtener lista de seguidores en tiktok, y ordenarlos por cantidad de seguidores, y por cantidad de videos
 import json
+
 
 def leerLista(direccion):
     lista = []
@@ -27,23 +26,26 @@ def guardarLista(direccion, lista):
 service = Service()
 options = webdriver.ChromeOptions()
 options.add_argument("start-maximized")
-# options.add_argument("--headless") # for delete without a visible browser
+# options.add_argument("--headless") # for work without a visible browser
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
 # Default User Profile
 options.add_argument("--profile-directory=Default")
 options.add_argument("--user-data-dir=C:/tk")
 driver = webdriver.Chrome(service=service, options=options)
+# You can stop this script here, to log in your tiktok account. Script into 'if loopControl' works in a browser with an account already open
 
-
+# When gets your followers info, script saves it on a file to process on the next running without enter tiktok again. Control that with the folling var 'loopControl'.
 listaUsuariosTodos = leerLista("D:\\listaAllTK.json")
 
 # When true, enter to selenium to get list. False to jump to process from saved file
 loopControl = False
 
 if loopControl:
+    # get your list with selenium
     listaUsuariosTodos = []
-    driver.get("https://www.tiktok.com/@jforco")
+    # Replace after @, with your userId.
+    driver.get("https://www.tiktok.com/@XXX_YOUR_USER_ID_XXXX")
     time.sleep(2)
     driver.find_element(By.CSS_SELECTOR, '#main-content-others_homepage > div > div.css-1g04lal-DivShareLayoutHeader-StyledDivShareLayoutHeaderV2.enm41492 > h3 > div:nth-child(1) > span').click()
     time.sleep(2)
@@ -73,22 +75,26 @@ if loopControl:
                 pass
             finally:
                 print(len(listaUsuariosTodos), " + ", count)
-    # check for remove larger attributes
+    # check for remove larger attributes, for a smaller saved file.
     for usuario in listaUsuariosTodos:
         del usuario['user']['avatarLarger']
         del usuario['user']['avatarMedium']
         del usuario['user']['avatarThumb']
         del usuario['user']['secUid']
+    # save data recovered for future work.
     guardarLista("D:\\listaAllTK.json", listaUsuariosTodos) 
 
 
 # here deletes followed accounts by followers number criteria
 listaUsuarios = listaUsuariosTodos.copy()
 listaUsuariosEliminar = []
+
+#get list of users to remove.
 for usuario in listaUsuarios:
     if(usuario['stats']['followerCount'] > 0 and usuario['stats']['followerCount'] < 5900):
         listaUsuariosEliminar.append(usuario)
 
+# remove them (unfollow) with selenium
 for usuario in listaUsuariosEliminar:
     id = usuario['user']['uniqueId']
     driver.get("https://www.tiktok.com/@" + id)
@@ -105,4 +111,4 @@ for usuario in listaUsuariosEliminar:
     
 if len(listaUsuariosEliminar) > 0:
     guardarLista("D:\\listaAllTK.json", listaUsuariosTodos)
-driver.close() #coment on first run, dont close browser, login tiktok (login fb/others if necessary to login tiktok)
+driver.close() 
